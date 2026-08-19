@@ -2,7 +2,7 @@ import React from 'react';
 import {StyleSheet, View} from 'react-native';
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 import AppHeader from '../components/AppHeader';
-import NetworkSimulator from '../components/NetworkSimulator';
+import DevNetworkControls from '../components/DevNetworkControls';
 import PaymentModeBadge from '../components/PaymentModeBadge';
 import PrimaryButton from '../components/PrimaryButton';
 import ScreenContainer from '../components/ScreenContainer';
@@ -21,7 +21,7 @@ import {spacing} from '../theme';
 type Props = NativeStackScreenProps<RootStackParamList, 'MerchantDashboard'>;
 
 export default function MerchantDashboardScreen({navigation}: Props) {
-  const {networkStatus, paymentMode, setNetworkStatus} = useSession();
+  const {networkStatus, paymentMode} = useSession();
 
   return (
     <ScreenContainer scroll>
@@ -31,9 +31,11 @@ export default function MerchantDashboardScreen({navigation}: Props) {
         <PaymentModeBadge mode={paymentMode} />
       </View>
 
-      <View style={styles.block}>
-        <NetworkSimulator status={networkStatus} onChange={setNetworkStatus} />
-      </View>
+      {__DEV__ && (
+        <View style={styles.block}>
+          <DevNetworkControls status={networkStatus} />
+        </View>
+      )}
 
       <View style={styles.block}>
         <WalletBalance amount={DEMO_MERCHANT_BALANCE} />

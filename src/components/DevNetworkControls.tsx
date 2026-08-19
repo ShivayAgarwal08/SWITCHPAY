@@ -1,35 +1,33 @@
 import React from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
 import type {NetworkStatus} from '../models';
+import {networkStatusService} from '../services/network/networkStatusService';
 import {colors, radius, spacing} from '../theme';
-
-interface Props {
-  status: NetworkStatus;
-  onChange: (status: NetworkStatus) => void;
-}
 
 const OPTIONS: NetworkStatus[] = ['ONLINE', 'OFFLINE'];
 
 /**
- * Stands in for real connectivity detection so the route switch can be shown.
- * It sets the UI network state only; it is not a manual payment-mode switch and
- * is removed once device connectivity detection lands.
+ * Development-only override for connectivity state. This component is never
+ * rendered in release builds and is clearly labeled so it cannot be mistaken
+ * for a user-facing mode switch.
  */
-export default function NetworkSimulator({status, onChange}: Props) {
+export default function DevNetworkControls({status}: {status: NetworkStatus}) {
   return (
     <View style={styles.card}>
-      <Text style={styles.label}>SIMULATED CONNECTIVITY (PLACEHOLDER)</Text>
+      <Text style={styles.label}>DEV ONLY: OVERRIDE NETWORK STATE</Text>
       <View style={styles.row}>
         {OPTIONS.map(option => {
           const active = option === status;
           return (
             <Pressable
-              accessibilityRole="button"
-              accessibilityState={{selected: active}}
               key={option}
-              onPress={() => onChange(option)}
+              onPress={() => networkStatusService.setStatus(option)}
               style={[styles.option, active && styles.optionActive]}>
-              <Text style={[styles.optionText, active && styles.optionTextActive]}>
+              <Text
+                style={[
+                  styles.optionText,
+                  active && styles.optionTextActive,
+                ]}>
                 {option}
               </Text>
             </Pressable>
@@ -37,9 +35,8 @@ export default function NetworkSimulator({status, onChange}: Props) {
         })}
       </View>
       <Text style={styles.note}>
-        Real device connectivity detection replaces this control in a later
-        phase. The route below always follows this state — never a manual mode
-        switch.
+        Production UI never exposes this control. Remove __DEV__ flag before
+        release.
       </Text>
     </View>
   );
@@ -48,14 +45,14 @@ export default function NetworkSimulator({status, onChange}: Props) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
-    borderColor: colors.border,
+    borderColor: colors.danger,
     borderRadius: radius.md,
     borderStyle: 'dashed',
     borderWidth: 1,
     padding: spacing.md,
   },
   label: {
-    color: colors.textMuted,
+    color: colors.danger,
     fontSize: 10,
     fontWeight: '700',
     letterSpacing: 1.2,
