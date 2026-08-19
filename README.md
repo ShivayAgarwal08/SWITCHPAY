@@ -62,9 +62,9 @@ The SwitchPay wallet is a **closed-loop prototype wallet**. It is **not real ban
 
 ## Current development phase
 
-**Phase 1 — project foundation.** This repository currently contains only the Android application skeleton, the architecture layout, and a build that is verified to produce an APK.
+**Phase 2 — UI, navigation and session state placeholders.** The app now has the Splash, Role Selection, Customer Dashboard, Merchant Dashboard, Scan & Pay, Merchant QR and Transaction History screens with navigation, reusable components, and a Payment Orchestrator route selection rule. The Payment Mode displayed on every screen follows the simulated network state.
 
-Not implemented yet: payment orchestration, network detection, online route, offline route, Bluetooth, QR scanning, wallet logic, local ledger, sync, reconciliation, authentication, backend, deployment.
+Not implemented yet: real network detection, Bluetooth, QR scanning/generation, online route execution, offline route execution, wallet mutation, local ledger, sync, reconciliation, backend, deployment.
 
 ## Project structure
 
@@ -72,7 +72,7 @@ Not implemented yet: payment orchestration, network detection, online route, off
 src/
   components/        reusable UI components
   screens/           screen-level UI
-  navigation/        navigation graph
+  navigation/        navigation graph with native-stack
   services/
     network/         connectivity detection (native/JS bridge)
     bluetooth/       local Bluetooth transport
@@ -83,13 +83,20 @@ src/
     routes/offline/  Edge Mode payment route
     sync/            deferred upload of offline transactions
     reconciliation/  post-sync balance/ledger reconciliation
-  store/             app state
+  store/             app state with SessionContext (role, network, derived payment mode)
   models/            shared domain types
   utils/             helpers
   theme/             colors, spacing, radii
 ```
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the responsibilities and boundaries of each layer.
+
+## Phase 2 notes
+
+- Network status is simulated by a labeled control on dashboards to demonstrate the automatic route switch from `ONLINE_MODE` to `EDGE_MODE`.
+- The orchestrator function `src/engine/orchestrator/selectPaymentMode.ts` is the single source of mode selection and already drives the UI.
+- Wallet balances are hard-coded demo values and are not mutated.
+- The PAY button is disabled with a note explaining the route is not implemented yet.
 
 ## Requirements
 
