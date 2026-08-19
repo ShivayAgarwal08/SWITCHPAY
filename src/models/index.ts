@@ -9,13 +9,28 @@ export type TransactionStatus = 'PENDING' | 'LOCAL_CONFIRMED' | 'SYNCED' | 'FAIL
 export type TransactionDirection = 'SENT' | 'RECEIVED';
 
 export interface Transaction {
-  id: string;
+  transactionId: string;
   amount: number;
-  sender: string;
-  receiver: string;
+  senderSwitchPayId: string;
+  receiverSwitchPayId: string;
   mode: PaymentMode;
   status: TransactionStatus;
   timestamp: number;
+}
+
+export interface Wallet {
+  id: string;
+  switchPayId: string;
+  name: string;
+  phone: string;
+  email: string;
+  balance: number;
+  createdAt: number;
+}
+
+export interface QRCodePayload {
+  type: 'SWITCHPAY_WALLET';
+  switchPayId: string;
 }
 
 export interface Merchant {
@@ -32,3 +47,4 @@ export const NETWORK_STATUS_LABEL: Record<NetworkStatus, string> = {
   ONLINE: 'ONLINE',
   OFFLINE: 'OFFLINE',
 };
+

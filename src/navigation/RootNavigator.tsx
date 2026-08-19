@@ -1,11 +1,11 @@
 import React from 'react';
 import {DarkTheme, NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import CustomerDashboardScreen from '../screens/CustomerDashboardScreen';
-import MerchantDashboardScreen from '../screens/MerchantDashboardScreen';
-import MerchantQrScreen from '../screens/MerchantQrScreen';
-import RoleSelectionScreen from '../screens/RoleSelectionScreen';
+import WalletDashboardScreen from '../screens/WalletDashboardScreen';
+import OnboardingScreen from '../screens/OnboardingScreen';
 import ScanAndPayScreen from '../screens/ScanAndPayScreen';
+import MyQrScreen from '../screens/MyQrScreen';
+import TransactionsScreen from '../screens/TransactionsScreen';
 import SplashScreen from '../screens/SplashScreen';
 import {colors} from '../theme';
 import type {RootStackParamList} from './types';
@@ -41,14 +41,14 @@ export default function RootNavigator() {
           options={{headerShown: false}}
         />
         <Stack.Screen
-          name="RoleSelection"
-          component={RoleSelectionScreen}
+          name="Onboarding"
+          component={OnboardingScreen}
           options={{headerShown: false}}
         />
         <Stack.Screen
-          name="CustomerDashboard"
-          component={CustomerDashboardScreen}
-          options={{title: 'Customer'}}
+          name="WalletDashboard"
+          component={WalletDashboardScreen}
+          options={{headerShown: false}}
         />
         <Stack.Screen
           name="ScanAndPay"
@@ -56,14 +56,14 @@ export default function RootNavigator() {
           options={{title: 'Scan & Pay'}}
         />
         <Stack.Screen
-          name="MerchantDashboard"
-          component={MerchantDashboardScreen}
-          options={{title: 'Merchant'}}
+          name="MyQr"
+          component={MyQrScreen}
+          options={{title: 'My QR'}}
         />
         <Stack.Screen
-          name="MerchantQr"
-          component={MerchantQrScreen}
-          options={{title: 'Merchant QR'}}
+          name="Transactions"
+          component={TransactionsScreen}
+          options={{title: 'Transactions'}}
         />
       </Stack.Navigator>
     </NavigationContainer>

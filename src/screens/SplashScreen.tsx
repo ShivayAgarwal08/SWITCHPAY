@@ -1,22 +1,35 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useRef} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 import ScreenContainer from '../components/ScreenContainer';
 import type {RootStackParamList} from '../navigation/types';
+import {useSession} from '../store/SessionContext';
 import {colors, radius, spacing} from '../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Splash'>;
 
-const SPLASH_DURATION_MS = 1600;
+const SPLASH_MIN_DURATION_MS = 1600;
 
 export default function SplashScreen({navigation}: Props) {
+  const {isLoading, wallet} = useSession();
+  const startTime = useRef(Date.now());
+
   useEffect(() => {
-    const timer = setTimeout(
-      () => navigation.replace('RoleSelection'),
-      SPLASH_DURATION_MS,
-    );
-    return () => clearTimeout(timer);
-  }, [navigation]);
+    if (!isLoading) {
+      const elapsed = Date.now() - startTime.current;
+      const remaining = Math.max(0, SPLASH_MIN_DURATION_MS - elapsed);
+      
+      const timer = setTimeout(() => {
+        if (wallet) {
+          navigation.replace('WalletDashboard');
+        } else {
+          navigation.replace('Onboarding');
+        }
+      }, remaining);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, wallet, navigation]);
 
   return (
     <ScreenContainer center>

@@ -6,17 +6,17 @@ import {formatAmount, formatTimestamp} from '../utils/format';
 
 interface Props {
   transactions: Transaction[];
+  currentSwitchPayId?: string;
   emptyMessage?: string;
 }
 
-export default function TransactionList({transactions, emptyMessage}: Props) {
+export default function TransactionList({transactions, currentSwitchPayId, emptyMessage}: Props) {
   if (transactions.length === 0) {
     return (
       <View style={styles.empty}>
         <Text style={styles.emptyTitle}>No transactions yet</Text>
         <Text style={styles.emptyBody}>
-          {emptyMessage ??
-            'Transactions appear here once the Payment Orchestrator can execute a route.'}
+          {emptyMessage ?? 'Transactions appear here once you send or receive money.'}
         </Text>
       </View>
     );
@@ -24,22 +24,31 @@ export default function TransactionList({transactions, emptyMessage}: Props) {
 
   return (
     <View>
-      {transactions.map(transaction => (
-        <View key={transaction.id} style={styles.row}>
-          <View style={styles.rowMain}>
-            <Text style={styles.counterparty}>{transaction.receiver}</Text>
-            <Text style={styles.meta}>
-              {PAYMENT_MODE_LABEL[transaction.mode]} ·{' '}
-              {formatTimestamp(transaction.timestamp)}
-            </Text>
-            <Text style={styles.id}>{transaction.id}</Text>
+      {transactions.map(transaction => {
+        const isSent = transaction.senderSwitchPayId === currentSwitchPayId;
+        const otherParty = isSent ? `To: ${transaction.receiverSwitchPayId}` : `From: ${transaction.senderSwitchPayId}`;
+        const prefix = isSent ? '-' : '+';
+        const amountColor = isSent ? colors.textPrimary : colors.primary;
+
+        return (
+          <View key={transaction.transactionId} style={styles.row}>
+            <View style={styles.rowMain}>
+              <Text style={styles.counterparty}>{otherParty}</Text>
+              <Text style={styles.meta}>
+                {PAYMENT_MODE_LABEL[transaction.mode]} ·{' '}
+                {formatTimestamp(transaction.timestamp)}
+              </Text>
+              <Text style={styles.id}>{transaction.transactionId}</Text>
+            </View>
+            <View style={styles.rowSide}>
+              <Text style={[styles.amount, {color: amountColor}]}>
+                {prefix}{formatAmount(transaction.amount)}
+              </Text>
+              <Text style={styles.status}>{transaction.status}</Text>
+            </View>
           </View>
-          <View style={styles.rowSide}>
-            <Text style={styles.amount}>{formatAmount(transaction.amount)}</Text>
-            <Text style={styles.status}>{transaction.status}</Text>
-          </View>
-        </View>
-      ))}
+        );
+      })}
     </View>
   );
 }

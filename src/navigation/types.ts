@@ -1,10 +1,10 @@
 export type RootStackParamList = {
   Splash: undefined;
-  RoleSelection: undefined;
-  CustomerDashboard: undefined;
+  Onboarding: undefined;
+  WalletDashboard: undefined;
   ScanAndPay: undefined;
-  MerchantDashboard: undefined;
-  MerchantQr: undefined;
+  MyQr: undefined;
+  Transactions: undefined;
 };
 
 declare global {

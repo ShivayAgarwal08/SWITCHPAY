@@ -6,26 +6,52 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import type {NetworkStatus, PaymentMode, Role} from '../models';
+import type {NetworkStatus, PaymentMode, Wallet, Transaction} from '../models';
 import {selectPaymentMode} from '../engine/orchestrator/selectPaymentMode';
 import {networkStatusService} from '../services/network/networkStatusService';
+import {walletService} from '../services/wallet/walletService';
+import {transactionService} from '../services/transaction/transactionService';
 
 interface SessionState {
-  role: Role | null;
+  wallet: Wallet | null;
+  transactions: Transaction[];
   networkStatus: NetworkStatus;
   paymentMode: PaymentMode;
-  setRole: (role: Role) => void;
-  clearRole: () => void;
+  refreshWallet: () => Promise<void>;
+  refreshTransactions: () => Promise<void>;
   setNetworkStatus: (status: NetworkStatus) => void;
+  isLoading: boolean;
 }
 
 const SessionContext = createContext<SessionState | null>(null);
 
 export function SessionProvider({children}: {children: React.ReactNode}) {
-  const [role, setRoleState] = useState<Role | null>(null);
+  const [wallet, setWallet] = useState<Wallet | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   const [networkStatus, setNetworkStatusState] = useState<NetworkStatus>(
     networkStatusService.getStatus(),
   );
+
+  const refreshWallet = useCallback(async () => {
+    const loadedWallet = await walletService.loadWallet();
+    setWallet(loadedWallet);
+  }, []);
+
+  const refreshTransactions = useCallback(async () => {
+    const loadedTransactions = await transactionService.loadTransactions();
+    setTransactions(loadedTransactions);
+  }, []);
+
+  useEffect(() => {
+    async function loadInitialData() {
+      await refreshWallet();
+      await refreshTransactions();
+      setIsLoading(false);
+    }
+    loadInitialData();
+  }, [refreshWallet, refreshTransactions]);
 
   useEffect(() => networkStatusService.subscribe(setNetworkStatusState), []);
 
@@ -35,14 +61,24 @@ export function SessionProvider({children}: {children: React.ReactNode}) {
 
   const value = useMemo<SessionState>(
     () => ({
-      role,
+      wallet,
+      transactions,
       networkStatus,
       paymentMode: selectPaymentMode(networkStatus),
-      setRole: setRoleState,
-      clearRole: () => setRoleState(null),
+      refreshWallet,
+      refreshTransactions,
       setNetworkStatus,
+      isLoading,
     }),
-    [role, networkStatus, setNetworkStatus],
+    [
+      wallet,
+      transactions,
+      networkStatus,
+      refreshWallet,
+      refreshTransactions,
+      setNetworkStatus,
+      isLoading,
+    ],
   );
 
   return (
