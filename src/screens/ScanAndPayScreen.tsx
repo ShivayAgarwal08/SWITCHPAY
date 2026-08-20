@@ -21,6 +21,7 @@ export default function ScanAndPayScreen({navigation}: Props) {
   const [scannedId, setScannedId] = useState<string | null>(null);
   const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
+  const [bleStatus, setBleStatus] = useState<string>('');
 
   useEffect(() => {
     (async () => {
@@ -59,12 +60,30 @@ export default function ScanAndPayScreen({navigation}: Props) {
     }
 
     setLoading(true);
+    setBleStatus('');
+    
     try {
+      // Show BLE status for edge mode
+      if (paymentMode === 'EDGE_MODE') {
+        setBleStatus('Initializing Bluetooth...');
+        await new Promise<void>(resolve => setTimeout(resolve, 500));
+        
+        setBleStatus('Searching for recipient device...');
+        await new Promise<void>(resolve => setTimeout(resolve, 1000));
+        
+        setBleStatus('Connecting via SwitchPay Edge...');
+        await new Promise<void>(resolve => setTimeout(resolve, 800));
+        
+        setBleStatus('Sending offline payment...');
+        await new Promise<void>(resolve => setTimeout(resolve, 600));
+      }
+
       const result = await paymentProcessor.processPayment(wallet, {
         recipientSwitchPayId: scannedId,
         amount: val,
       });
 
+      setBleStatus('');
       await refreshWallet();
       await refreshTransactions();
 
@@ -85,6 +104,7 @@ export default function ScanAndPayScreen({navigation}: Props) {
         });
       }
     } catch {
+      setBleStatus('');
       navigation.navigate('PaymentResult', {
         success: false,
         error: 'Payment failed. Please try again.',
@@ -145,6 +165,14 @@ export default function ScanAndPayScreen({navigation}: Props) {
           <View style={styles.block}>
             <PaymentModeBadge mode={paymentMode} />
           </View>
+
+          {bleStatus ? (
+            <View style={styles.block}>
+              <View style={styles.bleStatusCard}>
+                <Text style={styles.bleStatusText}>{bleStatus}</Text>
+              </View>
+            </View>
+          ) : null}
 
           <View style={styles.block}>
             <PrimaryButton
@@ -225,6 +253,20 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: '700',
     paddingVertical: spacing.sm,
+  },
+  bleStatusCard: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    padding: spacing.md,
+    alignItems: 'center',
+  },
+  bleStatusText: {
+    color: colors.textSecondary,
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });
 

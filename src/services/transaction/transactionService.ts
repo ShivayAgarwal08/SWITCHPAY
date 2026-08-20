@@ -18,4 +18,10 @@ export const transactionService = {
     txs.unshift(transaction); // Add to beginning (latest first)
     await this.saveTransactions(txs);
   },
+
+  async removeTransaction(transactionId: string): Promise<void> {
+    const txs = await this.loadTransactions();
+    const filtered = txs.filter(tx => tx.transactionId !== transactionId);
+    await this.saveTransactions(filtered);
+  },
 };

@@ -8,6 +8,13 @@ jest.mock('../src/services/network/networkStatusService');
 jest.mock('../src/services/wallet/walletService');
 jest.mock('../src/services/transaction/transactionService');
 
+// Mock the edge route to avoid react-native-ble-plx ES module issues
+jest.mock('../src/engine/paymentProcessor/routes/edgeRoute', () => ({
+  edgeRoute: {
+    execute: jest.fn().mockResolvedValue({ success: true }),
+  },
+}));
+
 const mockNetworkStatusService = networkStatusService as jest.Mocked<typeof networkStatusService>;
 const mockWalletService = walletService as jest.Mocked<typeof walletService>;
 const mockTransactionService = transactionService as jest.Mocked<typeof transactionService>;
