@@ -55,7 +55,7 @@ export default function OnboardingScreen({navigation}: Props) {
       await walletService.saveWallet(newWallet);
       await refreshWallet();
       navigation.replace('WalletDashboard');
-    } catch (e) {
+    } catch {
       Alert.alert('Error', 'Could not create wallet');
     } finally {
       setLoading(false);

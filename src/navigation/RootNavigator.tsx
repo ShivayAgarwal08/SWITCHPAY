@@ -7,6 +7,7 @@ import ScanAndPayScreen from '../screens/ScanAndPayScreen';
 import MyQrScreen from '../screens/MyQrScreen';
 import TransactionsScreen from '../screens/TransactionsScreen';
 import SplashScreen from '../screens/SplashScreen';
+import PaymentResultScreen from '../screens/PaymentResultScreen';
 import {colors} from '../theme';
 import type {RootStackParamList} from './types';
 
@@ -64,6 +65,11 @@ export default function RootNavigator() {
           name="Transactions"
           component={TransactionsScreen}
           options={{title: 'Transactions'}}
+        />
+        <Stack.Screen
+          name="PaymentResult"
+          component={PaymentResultScreen}
+          options={{title: 'Payment Result'}}
         />
       </Stack.Navigator>
     </NavigationContainer>

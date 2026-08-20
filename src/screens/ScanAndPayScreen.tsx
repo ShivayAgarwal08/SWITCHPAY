@@ -9,11 +9,9 @@ import ScreenContainer from '../components/ScreenContainer';
 import SectionTitle from '../components/SectionTitle';
 import type {RootStackParamList} from '../navigation/types';
 import {useSession} from '../store/SessionContext';
-import {walletService} from '../services/wallet/walletService';
-import {transactionService} from '../services/transaction/transactionService';
+import {paymentProcessor} from '../engine/paymentProcessor/paymentProcessor';
 import {colors, radius, spacing} from '../theme';
 import type {QRCodePayload} from '../models';
-import {v4 as uuidv4} from 'uuid';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ScanAndPay'>;
 
@@ -42,15 +40,11 @@ export default function ScanAndPayScreen({navigation}: Props) {
     try {
       const payload: QRCodePayload = JSON.parse(event.nativeEvent.codeStringValue);
       if (payload.type === 'SWITCHPAY_WALLET' && payload.switchPayId) {
-        if (payload.switchPayId === wallet?.switchPayId) {
-          Alert.alert('Error', 'You cannot send money to yourself.');
-          return;
-        }
         setScannedId(payload.switchPayId);
       } else {
         Alert.alert('Invalid QR', 'Not a valid SwitchPay QR code.');
       }
-    } catch (e) {
+    } catch {
       Alert.alert('Invalid QR', 'Not a valid SwitchPay QR code.');
     }
   };
@@ -64,35 +58,37 @@ export default function ScanAndPayScreen({navigation}: Props) {
       return;
     }
 
-    if (val > wallet.balance) {
-      Alert.alert('Error', 'Insufficient balance.');
-      return;
-    }
-
     setLoading(true);
     try {
-      // Deduct balance locally
-      await walletService.updateWalletBalance(-val);
-
-      // Record transaction
-      await transactionService.addTransaction({
-        transactionId: uuidv4(),
+      const result = await paymentProcessor.processPayment(wallet, {
+        recipientSwitchPayId: scannedId,
         amount: val,
-        senderSwitchPayId: wallet.switchPayId,
-        receiverSwitchPayId: scannedId,
-        mode: paymentMode,
-        status: 'LOCAL_CONFIRMED', // Confirmed locally as there's no backend
-        timestamp: Date.now(),
       });
 
       await refreshWallet();
       await refreshTransactions();
 
-      Alert.alert('Success', `Sent ₹${val} to ${scannedId}`, [
-        {text: 'OK', onPress: () => navigation.goBack()},
-      ]);
-    } catch (e) {
-      Alert.alert('Error', 'Payment failed.');
+      if (result.success && result.transaction) {
+        navigation.navigate('PaymentResult', {
+          success: true,
+          transactionId: result.transactionId,
+          amount: result.transaction.amount,
+          recipientSwitchPayId: result.transaction.receiverSwitchPayId,
+          paymentRoute: result.route,
+          transactionStatus: result.transaction.status,
+          timestamp: result.transaction.timestamp,
+        });
+      } else {
+        navigation.navigate('PaymentResult', {
+          success: false,
+          error: result.error || 'Payment failed',
+        });
+      }
+    } catch {
+      navigation.navigate('PaymentResult', {
+        success: false,
+        error: 'Payment failed. Please try again.',
+      });
     } finally {
       setLoading(false);
     }

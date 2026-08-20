@@ -6,7 +6,7 @@ import NetworkStatusPill from './NetworkStatusPill';
 
 interface Props {
   subtitle?: string;
-  networkStatus: NetworkStatus;
+  networkStatus?: NetworkStatus;
 }
 
 export default function AppHeader({subtitle, networkStatus}: Props) {
@@ -16,7 +16,7 @@ export default function AppHeader({subtitle, networkStatus}: Props) {
         <Text style={styles.brand}>SwitchPay</Text>
         {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
       </View>
-      <NetworkStatusPill status={networkStatus} />
+      {networkStatus && <NetworkStatusPill status={networkStatus} />}
     </View>
   );
 }

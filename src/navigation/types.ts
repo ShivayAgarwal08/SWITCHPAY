@@ -5,6 +5,16 @@ export type RootStackParamList = {
   ScanAndPay: undefined;
   MyQr: undefined;
   Transactions: undefined;
+  PaymentResult: {
+    success: boolean;
+    transactionId?: string;
+    amount?: number;
+    recipientSwitchPayId?: string;
+    paymentRoute?: string;
+    transactionStatus?: string;
+    timestamp?: number;
+    error?: string;
+  };
 };
 
 declare global {
